@@ -39,4 +39,3 @@ void AResourceNode::Tick(float DeltaTime)
 	// For now, extraction is handled externally
 
 }
-

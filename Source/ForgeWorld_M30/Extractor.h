@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "ResourceNode.h" // Needet to access the node
 #include "Extractor.generated.h"
 
 // connects to ResourceNode
@@ -29,6 +30,14 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Extraction")
     float ExtractionInterval;
 
+    /** Extraction rate in unit per second */
+    UPROPERTY(EditAnywhere)
+    float ExtractionRate
+
+    /** Internal Storage */
+    UPROPERTY(VisibleAnywhere)
+    TMap<EResourceType, int32> StoredResources;
+
     /** Internal timer to keep track of extraction time */
     float TimeSinceLastExtraction;
 
@@ -38,4 +47,10 @@ public:
 
     /** Performs the actual resource extraction */
     void PerformExtraction();
+
+private:
+    float ExtractionAccumulator;
 };
+
+UFUNCTION(BlueprintCallable, Category = "Extractor")
+void ConnectToNode(AResourceNode* Node);

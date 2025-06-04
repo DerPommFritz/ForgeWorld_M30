@@ -5,9 +5,8 @@ AExtractor::AExtractor()
 {
     PrimaryActorTick.bCanEverTick = true;
 
-    ExtractionInterval = 5.0f; // Every 5 seconds
-    ExtractionAmount = 10;
-    TimeSinceLastExtraction = 0.0f;
+    ExtractionRate = 5.0f; // 5 units per second
+    ExtractionAccumulator = 0.0f;
 }
 
 void AExtractor::BeginPlay()
@@ -19,15 +18,30 @@ void AExtractor::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    if (ConnectedNode)
-    {
-        TimeSinceLastExtraction += DeltaTime;
+    if (!ConnectedNode)
+        return
+    ExtractionAccumulator += DeltaTime * ExtractionRate;
 
-        if (TimeSinceLastExtraction >= ExtractionInterval)
+    // Only extract whole Unit
+    int32 UnitsToExtract = FMath::FloorToInt(ExtractionAccumulator);
+    if (UnitsToExtract > 0)
+    {
+        ExtractionAccumulator -= UnitsToExtract;
+
+        // Get resource type from node
+        EResourceType ResourceType = ConnectedNode->GetResourceType();
+
+        // Add to internal storage
+        if (StoredResources.Contains(ResourceType))
         {
-            PerformExtraction();
-            TimeSinceLastExtraction = 0.0f;
+            StoredResources[ResourceType] += UnitsToExtract;
         }
+        else
+        {
+            StoredResources.Add(ResourceType, UnitsToExtract);
+        }
+
+        // No depletion logic here
     }
 }
 
