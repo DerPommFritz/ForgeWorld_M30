@@ -7,6 +7,7 @@ AExtractor::AExtractor()
 
     ExtractionRate = 5.0f; // 5 units per second
     ExtractionAccumulator = 0.0f;
+    ExractionAmount = 1; // Ensure this is initialized in case PerformExtraction is called
 }
 
 void AExtractor::BeginPlay()
@@ -19,7 +20,7 @@ void AExtractor::Tick(float DeltaTime)
     Super::Tick(DeltaTime);
 
     if (!ConnectedNode)
-        return
+        return;
     ExtractionAccumulator += DeltaTime * ExtractionRate;
 
     // Only extract whole Unit
@@ -32,16 +33,13 @@ void AExtractor::Tick(float DeltaTime)
         EResourceType ResourceType = ConnectedNode->GetResourceType();
 
         // Add to internal storage
-        if (StoredResources.Contains(ResourceType))
-        {
-            StoredResources[ResourceType] += UnitsToExtract;
-        }
-        else
-        {
-            StoredResources.Add(ResourceType, UnitsToExtract);
-        }
+        int32& StoredAmount = StoredResources.FindOrAdd(ResourceType);
+        StoredAmount += UnitsToExtract;
 
-        // No depletion logic here
+        // Debug output (optional)
+        UE_LOG(LogTemp, Log, TEXT("Extractor: +%d units of %s"),
+            UnitsToExtract,
+            *UENUM::GetValueAsString(ResourceType));
     }
 }
 
